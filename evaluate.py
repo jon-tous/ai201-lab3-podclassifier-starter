@@ -51,14 +51,14 @@ def compute_accuracy(predictions: list[str], ground_truth: list[str]) -> float:
     """
     Compute overall classification accuracy.
 
-    TODO — Milestone 3:
-
     Accuracy = number of correct predictions / total predictions.
     A prediction is correct when it exactly matches the ground truth label.
-
-    Before writing code, complete specs/evaluation-spec.md.
+    Returns 1.0 if both lists are empty.
     """
-    return 0.0
+    if not predictions:
+        return 1.0
+    correct = sum(p == g for p, g in zip(predictions, ground_truth))
+    return correct / len(predictions)
 
 
 def compute_per_class_accuracy(
@@ -67,23 +67,24 @@ def compute_per_class_accuracy(
     """
     Compute accuracy broken down by each label class.
 
-    TODO — Milestone 3 (complete after compute_accuracy):
-
-    For each label in VALID_LABELS, compute:
-      - "correct"  : number of episodes with this ground-truth label predicted correctly
-      - "total"    : number of episodes with this ground-truth label
+    For each label in VALID_LABELS, computes:
+      - "correct"  : episodes with this ground-truth label predicted correctly
+      - "total"    : episodes with this ground-truth label
       - "accuracy" : correct / total (0.0 if total is 0)
-
-    Return a dict keyed by label. Example:
-      {
-        "interview": {"correct": 4, "total": 5, "accuracy": 0.8},
-        "solo":      {"correct": 5, "total": 5, "accuracy": 1.0},
-        ...
-      }
-
-    Before writing code, complete specs/evaluation-spec.md.
     """
-    return {label: {"correct": 0, "total": 0, "accuracy": 0.0} for label in VALID_LABELS}
+    result = {label: {"correct": 0, "total": 0, "accuracy": 0.0} for label in VALID_LABELS}
+
+    for pred, truth in zip(predictions, ground_truth):
+        if truth in result:
+            result[truth]["total"] += 1
+            if pred == truth:
+                result[truth]["correct"] += 1
+
+    for label, stats in result.items():
+        if stats["total"] > 0:
+            stats["accuracy"] = stats["correct"] / stats["total"]
+
+    return result
 
 
 def format_evaluation_report(eval_results: dict) -> str:
